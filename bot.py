@@ -3,8 +3,11 @@ import logging
 from aiogram import Bot, Dispatcher, executor, types
 
 # Объект бота
-bot = Bot(token="5289445506:AAGHcHIS0tWNexXpC_oc83X707l0OyxMfYQ")
-# Диспетчер для бота
+bot_token = getenv("BOT_TOKEN")
+if not bot_token:
+    exit("Error: no token provided")
+
+bot = Bot(token=bot_token)# Диспетчер для бота
 dp = Dispatcher(bot)
 # Включаем логирование, чтобы не пропустить важные сообщения
 logging.basicConfig(level=logging.INFO)
