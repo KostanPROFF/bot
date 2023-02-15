@@ -1,24 +1,35 @@
-#!venv/bin/python
-import logging
-from aiogram import Bot, Dispatcher, executor, types
+import subprocess
+import telegram
+import time
 
-# Объект бота
-bot_token = getenv("BOT_TOKEN")
-if not bot_token:
-    exit("Error: no token provided")
+TOKEN = "YOUR_BOT_TOKEN_HERE"
+CHAT_ID = "-1001735137359"
+SERVER_ADDRESS = "176.36.160.82"
 
-bot = Bot(token=bot_token)# Диспетчер для бота
-dp = Dispatcher(bot)
-# Включаем логирование, чтобы не пропустить важные сообщения
-logging.basicConfig(level=logging.INFO)
+def ping_server():
+    response = subprocess.call(['ping', '-c', '3', SERVER_ADDRESS], stdout=subprocess.DEVNULL)
+    if response == 0:
+        return True
+    else:
+        return False
 
+def send_message(message):
+    bot = telegram.Bot(token=TOKEN)
+    bot.send_message(chat_id=CHAT_ID, text=message)
 
-# Хэндлер на команду /test1
-@dp.message_handler(commands="test1")
-async def cmd_test1(message: types.Message):
-    await message.reply("Test 1")
-
+def main():
+    server_status = ping_server()
+    if server_status:
+        send_message("Server is up!")
+    else:
+        downtime_start = time.time()
+        send_message("Server is down!")
+        while not server_status:
+            time.sleep(60)
+            server_status = ping_server()
+        downtime_end = time.time()
+        downtime = downtime_end - downtime_start
+        send_message("Server is back up! Downtime lasted {} seconds".format(downtime))
 
 if __name__ == "__main__":
-    # Запуск бота
-    executor.start_polling(dp, skip_updates=True)
+    main()
